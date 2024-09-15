@@ -2,8 +2,8 @@ title: Nighthawk Pages
 description: "Class of 2025"
 owner_name: Nisarg Shah
 github_username: NisargRhino
-github_repo: "nisargshah_student_2025" 
-baseurl: "/nisargshah_student_2025"
+github_repo: "nisargshah_student2025" 
+baseurl: "/nisargshah_student2025"
 future: true
 remote_theme: jekyll/minima
 minima:
