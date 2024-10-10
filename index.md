@@ -1,7 +1,6 @@
 <!-- Sidebar Container -->
 <div class="sidebar">
 <h3>Menu</h3>
-<video src="{{ site.baseurl }}/images/tyla.mp4" controls style="width: 100%; margin-bottom: 20px;"></video>
     <ul class="sidebar-items">
         <li><a href="#" class="sidebar-link">Home</a></li>
         <li><a href="#" class="sidebar-link">Projects</a></li>
