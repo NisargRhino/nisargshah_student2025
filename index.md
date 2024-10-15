@@ -2,7 +2,6 @@
 <div class="sidebar">
 <h3>Menu</h3>
     <ul class="sidebar-items">
-        <video src="{{ site.baseurl }}/images/tyla.mp4" controls style="width: 100%; margin-bottom: 20px;"></video> <!-- Add this line for the video -->
 
         <li><a href="#" class="sidebar-link">Home</a></li>
         <li><a href="#" class="sidebar-link">Projects</a></li>
