@@ -53,9 +53,11 @@ a:hover {
 
 ## Introduction
 
-All of the questions that I got wrong on the MC, and the explanations for them.
 
 
+# SCORE: 30/40
+
+Main Idea questions, that I thought I need to review.
 
 
 # Question 1: Interfaces and Polymorphism
