@@ -59,6 +59,7 @@ a:hover {
 
 Main Idea questions, that I thought I need to review.
 
+<img src="{{ site.baseurl }}/images/mcimage.png" alt="Random"
 
 # Question 1: Interfaces and Polymorphism
 
