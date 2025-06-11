@@ -1,103 +1,175 @@
 ---
 layout: post
-title: MC+FRQ
+title: Stock Simulator Overview
 categories: ['DevOps']
-permalink: /mc
+permalink: /stocks
 menu: nav/tools_setup.html
 toc: True
 comments: True
 ---
 
-## **MCQ Performance Review**
-<img width="1791" alt="Image" src="https://github.com/user-attachments/assets/95ddb4b4-0937-4f9c-bc0d-d06153700b84" />
+# Bull & Byte: Stock Market Simulator for Financial Literacy
 
-I'm fairly satisfied with this score, especially considering it was my first practice MCQ. For the questions I got wrong, I now understand most of my mistakes and what led to them. Moving forward, I aim to refine these areas and improve before the AP Exams.
 
-### **Areas for Improvement**
-<img width="1806" alt="Image" src="https://github.com/user-attachments/assets/2003e480-6e0b-43ed-9b59-d966cdbf0d07" />
 
-- **Recursion:** Improper base case handling and failing to ensure each recursive call reduced the problem effectively.
-- **2D Arrays:** Misinterpreted how row and column indices updated within loops, leading to incorrect element placements and variable misunderstandings.
-- **Random Number Generation:** Failed to correctly generate independent random values for number cube rolls.
-- **Loop Tracking:** Misinterpreted how `while` loops update the board in Question 31, leading to incorrect assumptions about `row--` and `col++`. 
+## Project Introduction
 
-## **Corrections**
+> "Investing education reimagined for the classroom."
 
-### **Question 9: Number Cube Rolls**
-![Image](https://github.com/user-attachments/assets/cf01dea9-0f26-4854-9ee5-52605a32bd17)
-**Mistake:** I didn’t correctly simulate the independent rolls of two number cubes.
-**Correction:** I need to ensure each cube gets a separate random value. Practicing random number generation will help reinforce this concept.
+**Bull & Byte** is a full-stack stock market simulator developed to teach high school students the fundamentals of financial literacy and trading. Designed for realism, educational depth, and classroom usability, it brings the world of investing to life with interactive charts, real-time prices, and intuitive interfaces.
 
-### **Question 16: Result Variable Misunderstanding**
-![Image](https://github.com/user-attachments/assets/841f5a85-159c-4998-b335-d1ec2d476865)
-**Mistake:** I assumed the variable stored the largest value when it actually stored the column index of the largest value.
-**Correction:** I need to pay closer attention to what each variable represents within a method.
+---
 
-### **Question 31: Loop Misinterpretation**
-![Image](https://github.com/user-attachments/assets/93e7e122-dc2e-4022-8ae2-c8f5ce969730)
-**Mistake:** I misinterpreted how `while` loops updated the board and assumed 'X' placements followed a different pattern.
-**Correction:** I should systematically track loop updates to ensure correct pattern recognition.
+## Backend System
 
-## **Free Response Questions (FRQ) Solutions**
+### Flask-Based Financial Engine
 
-### **2014 FRQ - Word Scrambler**
-This class takes an array of words and creates a scrambled version by recombining word pairs.
+The backend handles financial data processing, user authentication, transaction logic, and price caching.
 
+#### Key Features:
+- Live market data from **Yahoo Finance API**  
+- Optimized caching to reduce rate-limit issues  
+- Secure and trackable buy/sell transactions  
+- Real-time profit/loss calculation per portfolio  
+- Persistent user sessions and login system
+
+---
+
+### 📌 Sample Backend Code: Fetch Stock Data
 
 ```python
+# /api/get_stock_data/<ticker>
+from flask import Flask, jsonify
+import yfinance as yf
 
-class WordScrambler:
-    def __init__(self, wordArr):
-        """Constructor initializes scrambledWords with mixed words from the given array."""
-        self.scrambledWords = self.mixedWords(wordArr)
+@app.route("/api/get_stock_data/<ticker>", methods=["GET"])
+def get_stock_data(ticker):
+    stock = yf.Ticker(ticker)
+    data = stock.history(period="1d", interval="1m")
+    return jsonify({
+        "price": stock.info.get('currentPrice'),
+        "volume": stock.info.get('volume'),
+        "dayHigh": stock.info.get('dayHigh'),
+        "dayLow": stock.info.get('dayLow'),
+        "fiftyTwoWeekHigh": stock.info.get('fiftyTwoWeekHigh'),
+        "fiftyTwoWeekLow": stock.info.get('fiftyTwoWeekLow'),
+    })
+````
 
-    def recombine(self, word1, word2):
-        """Takes two words and combines them by taking the first half of the first word 
-        and the second half of the second word."""
-        mid1 = len(word1) // 2
-        mid2 = len(word2) // 2
-        return word1[:mid1] + word2[mid2:]
+---
 
-    def mixedWords(self, words):
-        """Takes an array of words and forms a new array where each pair of words is recombined."""
-        mixed = []
-        for i in range(0, len(words), 2):
-            mixed.append(self.recombine(words[i], words[i + 1]))
-            mixed.append(self.recombine(words[i + 1], words[i]))
-        return mixed
-
-# Example Usage
-words = ["apple", "banana", "cherry", "date"]
-scrambler = WordScrambler(words)
-scrambler.scrambledWords
-    
-```
-
-### **2015 FRQ - Diverse Array**
-This class determines whether a 2D array is diverse (i.e., all row sums are unique).
-
+### 📌 Sample Backend Code: Add Stock to Portfolio
 
 ```python
+# /api/add_stock (POST)
+@app.route("/api/add_stock", methods=["POST"])
+def add_stock():
+    data = request.json
+    user_id = data.get("user_id")
+    ticker = data.get("ticker")
+    quantity = int(data.get("quantity"))
+    price = float(data.get("price"))
 
-class DiverseArray:
-    @staticmethod
-    def arraySum(arr):
-        """Computes the sum of the elements in a one-dimensional array."""
-        return sum(arr)
-
-    @staticmethod
-    def rowSums(arr2D):
-        """Computes the row sums of a two-dimensional array."""
-        return [DiverseArray.arraySum(row) for row in arr2D]
-
-    @staticmethod
-    def isDiverse(arr2D):
-        """Determines if a 2D array is diverse, meaning no two rows have the same sum."""
-        sums = DiverseArray.rowSums(arr2D)
-        return len(sums) == len(set(sums))
-
-# Example Usage
-matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-DiverseArray.isDiverse(matrix)  # Output: False (since two rows have the same sum)
-    
+    # Save to DB (simplified)
+    new_transaction = StockTransaction(
+        user_id=user_id,
+        ticker=ticker.upper(),
+        quantity=quantity,
+        price=price
+    )
+    db.session.add(new_transaction)
+    db.session.commit()
+    return jsonify({"status": "success", "message": f"Added {quantity} shares of {ticker}."})
 ```
+
+---
+
+## Frontend Interface
+
+### Cross-Device Financial Playground
+
+Built with HTML, CSS, and JavaScript for speed and responsiveness. The UI integrates educational and analytical features for an accessible and professional experience.
+
+#### Key Features:
+
+* Real-time charts powered by Chart.js and Matplotlib
+* Interactive sidebars for instant stock switching
+* Modal-based trading system for clean UX
+* Financial term tooltips and guided tutorials
+* Leaderboard and ranking logic (for classroom competition)
+
+---
+
+## Screenshots
+
+### Main Dashboard View
+
+![Stock Simulator Dashboard](../../mnt/data/Screenshot%202025-06-11%20at%2012.12.48%E2%80%AFPM.png)
+
+Includes live NASDAQ data (e.g., AAPL), daily stats, and price history charts.
+
+---
+
+## Unique Qualities
+
+* **Gamified Learning:** Turns investing into an engaging classroom experience
+* **Data-Driven Architecture:** Uses live data, not static mockups
+* **API-Efficient:** Built-in rate limiting + caching ensures stability
+* **Classroom-Tested:** Stress-tested in real usage during live periods
+
+---
+
+## Roles and Contributions
+
+* **Full-Stack Development:** Linked Flask backend to JS-based frontend
+* **UI/UX Design:** Created all layouts, icons, and component flows
+* **Project Leadership:** Managed planning, delegation, and agile sprints
+
+---
+
+## Events & Showcases
+
+### Night at the Museum (N\@TM)
+
+* Demonstrated live to educators, students, and families
+* Implemented UI changes based on student feedback
+
+### CTE Expo
+
+* Presented to the principal and career pathway coordinators
+* Approved for potential school-wide integration
+
+---
+
+## Real-World Impact
+
+**Bull & Byte** is actively used across multiple CS periods at Del Norte High School. Students:
+
+* Manage virtual portfolios
+* Practice making informed trading decisions
+* Learn about P/E ratios, volatility, and long-term vs. short-term returns
+
+It supports **HyFlex Learning**, allowing students to experiment asynchronously and still compare performance in-class.
+
+---
+
+## GitHub Planning & Issue Tracker
+
+Detailed architecture, future tasks, and team workflow are available here:
+👉 [View on GitHub: Issue #109 – Stocks Overview](https://github.com/CSA-Coders-2025/Planning-Repository-Issue-House-/issues/109)
+
+---
+
+## Next Steps
+
+* **Add Global Markets:** Pull data from London, Tokyo, and NSE APIs
+* **Launch Mobile Version:** Port front-end to React Native
+* **Add Portfolio Analytics:** Include Sharpe Ratio, beta values, risk assessment
+
+> **Bull & Byte** is more than a simulator—it's a platform for building financial intuition, critical thinking, and tech skills in tomorrow's leaders.
+
+```
+
+---
+
+
